@@ -1,0 +1,23 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{F305B25D-44F0-9005-FDAE-9DEC0A4D37F8}") = "Dungeon Diver", "Assembly-CSharp.csproj", "{1F53C40B-4D48-A38C-7A9F-ED7E835B6D57}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1F53C40B-4D48-A38C-7A9F-ED7E835B6D57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F53C40B-4D48-A38C-7A9F-ED7E835B6D57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F53C40B-4D48-A38C-7A9F-ED7E835B6D57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F53C40B-4D48-A38C-7A9F-ED7E835B6D57}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
