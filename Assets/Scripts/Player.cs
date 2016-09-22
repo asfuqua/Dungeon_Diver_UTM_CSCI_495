@@ -29,6 +29,11 @@ public class Player : Mover
 	public Text healthText;
 	public Text manaText;
 
+	public Button menuButton;
+	public Button movementButton;
+	public Button attackButton;
+	public Button inventoryButton;
+
 
 	// VARIABLES USED IN MOVEMENT INDICATORS
 	//public Vector3 playerPosition;
@@ -63,7 +68,8 @@ public class Player : Mover
 		healthBar.maxValue = maxHealth;
 		healthBar.value = (int)(maxHealth * 0.5);
 		manaBar.maxValue = maxMana;
-		manaBar.value = (int)(maxMana * 0.4);
+		manaBar.value = 0;
+		//manaBar.value = (int)(maxMana * 0.4);
 		healthText.text = healthBar.value + " / " + maxHealth;
 		manaText.text = manaBar.value + " / " + maxMana;
 
@@ -124,6 +130,7 @@ public class Player : Mover
 
 
 		}*/
+
 
 
 		int horizontal = 0;
