@@ -36,7 +36,7 @@ public class Board : MonoBehaviour
 
 	// LAVA TILES
 	public GameObject[] lavaTiles;
-	public GameObject lavaCorner;
+	public GameObject[] lavaWall;
 
 	// DESERT TILES
 	public GameObject[] desertTiles;
@@ -142,7 +142,8 @@ public class Board : MonoBehaviour
 					instance.transform.SetParent (boardHolder);
 					break;
 				case 3:
-					instance = Instantiate (lavaCorner, position, Quaternion.identity) as GameObject;
+					currentTile = lavaWall [Random.Range (0, lavaWall.Length)];
+					instance = Instantiate (currentTile, position, Quaternion.identity) as GameObject;
 					instance.transform.SetParent (boardHolder);
 					break;
 				case 4:

@@ -43,6 +43,7 @@ public class Player : Mover
 
 
 	// COMPONENT ACCESSORS
+	public GameObject WeaponAnimation;
 	private Transform player;
 	private Animator animator;
 	private SpriteRenderer spriterenderer;
@@ -64,12 +65,10 @@ public class Player : Mover
 		hasIceSpell = 0;
 
 
-
 		healthBar.maxValue = maxHealth;
-		healthBar.value = (int)(maxHealth * 0.5);
+		healthBar.value = (int)(maxHealth * 1);
 		manaBar.maxValue = maxMana;
-		manaBar.value = 0;
-		//manaBar.value = (int)(maxMana * 0.4);
+		manaBar.value = (int)(maxMana * 1);
 		healthText.text = healthBar.value + " / " + maxHealth;
 		manaText.text = manaBar.value + " / " + maxMana;
 
