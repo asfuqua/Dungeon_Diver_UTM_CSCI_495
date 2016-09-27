@@ -28,11 +28,14 @@ public class Player : Mover
 	public Slider manaBar;
 	public Text healthText;
 	public Text manaText;
-
-	public Button menuButton;
-	public Button movementButton;
-	public Button attackButton;
-	public Button inventoryButton;
+	public GameObject Inventory;
+	public GameObject AmmoPanel;
+	public Text SwordText;
+	public Text SpearText;
+	public Text BowText;
+	public Text ArrowText;
+	public Text FireText;
+	public Text IceText;
 
 
 	// VARIABLES USED IN MOVEMENT INDICATORS
@@ -60,10 +63,9 @@ public class Player : Mover
 		hasSword = 0;
 		hasSpear = 0;
 		hasBow = 0;
-		arrows = 0;
+		arrows = 30;
 		hasFireSpell = 0;
 		hasIceSpell = 0;
-
 
 		healthBar.maxValue = maxHealth;
 		healthBar.value = (int)(maxHealth * 1);
@@ -72,7 +74,12 @@ public class Player : Mover
 		healthText.text = healthBar.value + " / " + maxHealth;
 		manaText.text = manaBar.value + " / " + maxMana;
 
-
+		SwordText.text = "Sword: " + hasSword.ToString().PadRight(3);
+		SpearText.text = "Spear: " + hasSpear.ToString().PadRight(3);
+		BowText.text = "Bow: " + hasBow.ToString().PadRight(3);
+		ArrowText.text = "Arrow: " + arrows.ToString().PadRight(3);
+		FireText.text = "Fire: " + hasFireSpell.ToString().PadRight(3);
+		IceText.text = "Ice: " + hasIceSpell.ToString().PadRight(3);
 
 		/*
 		player = GameObject.FindGameObjectWithTag ("Player").transform;
