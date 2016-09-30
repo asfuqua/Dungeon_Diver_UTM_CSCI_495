@@ -5,6 +5,7 @@ public class Enemy : Mover
 {
 	public int playerDamage;
 	public int enemyHealth;
+	public int enemyMaxHealth;
 	public int range;
 	public int damage;
 
@@ -18,7 +19,9 @@ public class Enemy : Mover
 	protected override void Start()
 	{
 		range = 1;
-		damage = 5;
+		//damage = 5;
+		enemyHealth = 10;
+		enemyMaxHealth = 10;
 		Game.instance.addEnemy (this);
 		animator = GetComponent<Animator> ();
 		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<Player>();
@@ -52,6 +55,25 @@ public class Enemy : Mover
 		player.loseHealth (damage);
 	}
 
+	public void takeDamage(int damage)
+	{
+		Debug.Log ("Enemy Hit!");
+		enemyHealth -= damage;
+		float percentage = (float)enemyHealth / (float)enemyMaxHealth;
+
+		this.transform.localScale = new Vector3 (percentage, percentage, 1f);
+		if (this.transform.localScale.x < 0 || this.transform.localScale.y < 0)
+		{
+			this.transform.localScale = new Vector3 (0f, 0f, 1f);
+		}
+
+		if (this.transform.localScale == new Vector3 (0f, 0f, 1f))
+		{
+			this.gameObject.SetActive (false);
+			Game.instance.removeEnemy (this);
+		}
+	
+	}
 
 	public void moveEnemy()
 	{

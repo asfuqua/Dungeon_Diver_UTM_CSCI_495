@@ -26,7 +26,7 @@ public class Game : MonoBehaviour
 
 
 	private List<Enemy> enemies;
-	private int level = 1;
+	private int level = 30;
 	private bool enemiesMoving = false;
 	private bool doingSetup = false;
 
@@ -90,6 +90,11 @@ public class Game : MonoBehaviour
 	public void addEnemy(Enemy script)
 	{
 		enemies.Add (script);
+	}
+
+	public void removeEnemy(Enemy script)
+	{
+		enemies.Remove (script);
 	}
 
 	IEnumerator moveEnemies()

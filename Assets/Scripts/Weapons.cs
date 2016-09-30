@@ -19,31 +19,37 @@ public class Weapons : MonoBehaviour
 	public void sword()
 	{
 		player.hasSword += 10;
+		player.updateAmmo ();
 	}
 
 	public void spear()
 	{
 		player.hasSpear += 10;
+		player.updateAmmo ();
 	}
 
 	public void bow()
 	{
 		player.hasBow += 10;
+		player.updateAmmo ();
 	}
 
 	public void arrowBundle()
 	{
 		player.arrows += Random.Range (3, 10);
+		player.updateAmmo ();
 	}
 
 	public void fireSpell()
 	{
 		player.hasFireSpell += 10;
+		player.updateAmmo ();
 	}
 
 	public void iceSpell()
 	{
 		player.hasIceSpell += 10;
+		player.updateAmmo ();
 	}
 
 

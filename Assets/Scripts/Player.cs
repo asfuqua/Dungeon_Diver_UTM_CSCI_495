@@ -11,7 +11,7 @@ public class Player : Mover
 	public int maxHealth;
 	//public int mana;
 	public int maxMana;
-
+	public int atk;
 
 	// ITEM TURN DECAYERS
 	public int damageIncrease;
@@ -36,6 +36,7 @@ public class Player : Mover
 	public Text ArrowText;
 	public Text FireText;
 	public Text IceText;
+	public Image CurrentEquip;
 
 
 	// VARIABLES USED IN MOVEMENT INDICATORS
@@ -66,20 +67,15 @@ public class Player : Mover
 		arrows = 30;
 		hasFireSpell = 0;
 		hasIceSpell = 0;
+		atk = 4;
 
 		healthBar.maxValue = maxHealth;
 		healthBar.value = (int)(maxHealth * 1);
 		manaBar.maxValue = maxMana;
 		manaBar.value = (int)(maxMana * 1);
-		healthText.text = healthBar.value + " / " + maxHealth;
-		manaText.text = manaBar.value + " / " + maxMana;
 
-		SwordText.text = "Sword: " + hasSword.ToString().PadRight(3);
-		SpearText.text = "Spear: " + hasSpear.ToString().PadRight(3);
-		BowText.text = "Bow: " + hasBow.ToString().PadRight(3);
-		ArrowText.text = "Arrow: " + arrows.ToString().PadRight(3);
-		FireText.text = "Fire: " + hasFireSpell.ToString().PadRight(3);
-		IceText.text = "Ice: " + hasIceSpell.ToString().PadRight(3);
+		updateBars ();
+		updateAmmo ();
 
 		/*
 		player = GameObject.FindGameObjectWithTag ("Player").transform;
@@ -189,14 +185,6 @@ public class Player : Mover
 
 	private void OnTriggerEnter2D(Collider2D other)
 	{
-
-		/*if (other.tag == "Health Potion")
-		{
-			Potion.instance.healingPotion ();
-			other.gameObject.SetActive(false);
-		}*/
-
-
 		switch (other.tag)
 		{
 			case "Health Potion": 
@@ -256,33 +244,42 @@ public class Player : Mover
 	public void gainHealth(int gain)
 	{
 		healthBar.value += gain;
-		updateText ();
+		updateBars ();
 	}
 
 	public void loseHealth(int loss)
 	{
 		healthBar.value -= loss;
-		updateText ();
+		updateBars ();
 	}
 
 	public void gainMana(int gain)
 	{
 		manaBar.value += gain;
-		updateText ();
+		updateBars ();
 	}
 
 	public void loseMana(int loss)
 	{
 		manaBar.value -= loss;
-		updateText ();
+		updateBars ();
 	}
 
-	public void updateText()
+	public void updateBars()
 	{
 		healthText.text = healthBar.value + " / " + maxHealth;
 		manaText.text = manaBar.value + " / " + maxMana;
 	}
 
+	public void updateAmmo()
+	{
+		SwordText.text = "Sword: " + hasSword.ToString().PadRight(3);
+		SpearText.text = "Spear: " + hasSpear.ToString().PadRight(3);
+		BowText.text = "Bow: " + hasBow.ToString().PadRight(3);
+		ArrowText.text = "Arrows: " + arrows.ToString().PadRight(3);
+		FireText.text = "Fire: " + hasFireSpell.ToString().PadRight(3);
+		IceText.text = "Ice: " + hasIceSpell.ToString().PadRight(3);
+	}
 
 	private void CheckIfGameOver()
 	{
@@ -294,8 +291,11 @@ public class Player : Mover
 	}
 
 
-	protected override void OnCantMove<T>(T component)
+	protected override void OnCantMove<T>(T Component)
 	{
-		Debug.Log("OnCantMove being called.");
+		Enemy hitEnemy = Component as Enemy;
+		WeaponAnimation.GetComponent<Animator>().SetTrigger ("swordSwing");
+		hitEnemy.takeDamage (atk);
+
 	}
 }
