@@ -52,6 +52,7 @@
      <Compile Include="Assets\Scripts\Mover.cs" />
      <Compile Include="Assets\Scripts\Player.cs" />
      <Compile Include="Assets\Scripts\Potion.cs" />
+     <Compile Include="Assets\Scripts\Slot.cs" />
      <Compile Include="Assets\Scripts\Weapons.cs" />
      <None Include="Assets\Fonts\OFL.txt" />
  <Reference Include="UnityEngine.UI">

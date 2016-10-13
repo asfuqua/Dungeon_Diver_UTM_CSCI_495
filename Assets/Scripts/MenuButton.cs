@@ -13,12 +13,13 @@ public class MenuButton : MonoBehaviour
 
 
 
-
 	void Start()
 	{
 		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<Player> ();
 		moveOn = false;
 		attackOn = false;
+
+	
 	}
 
 	void Update()
@@ -62,7 +63,7 @@ public class MenuButton : MonoBehaviour
 
 	public void openInventory()
 	{
-		Debug.Log ("Inventory Opened!");
+		player.Inventory.SetActive (true);
 	}
 
 	public void openSettings()
@@ -70,5 +71,44 @@ public class MenuButton : MonoBehaviour
 		Debug.Log ("Settings opened!");
 	}
 
+	public void equipSword()
+	{
+		if (player.hasSword > 0)
+		{
+			player.equippedWeapon = 1;
+			//player.CurrentEquip.GetComponent<
+		}
+	}
 
+	public void equipSpear()
+	{
+		if (player.hasSpear > 0)
+		{
+			player.equippedWeapon = 2;
+		}
+	}
+
+	public void equipBow()
+	{
+		if (player.hasBow > 0 && player.arrows > 0)
+		{
+			player.equippedWeapon = 3;
+		}
+	}
+
+	public void equipFire()
+	{
+		if (player.hasFireSpell > 0)
+		{
+			player.equippedWeapon = 4;
+		}
+	}
+
+	public void equipIce()
+	{
+		if (player.hasIceSpell > 0)
+		{
+			player.equippedWeapon = 5;
+		}
+	}
 }

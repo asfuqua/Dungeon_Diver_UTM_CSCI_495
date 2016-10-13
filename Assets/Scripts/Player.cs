@@ -12,6 +12,7 @@ public class Player : Mover
 	//public int mana;
 	public int maxMana;
 	public int atk;
+	public int equippedWeapon;
 
 	// ITEM TURN DECAYERS
 	public int damageIncrease;
@@ -68,11 +69,13 @@ public class Player : Mover
 		hasFireSpell = 0;
 		hasIceSpell = 0;
 		atk = 4;
+		equippedWeapon = 0;
+
 
 		healthBar.maxValue = maxHealth;
-		healthBar.value = (int)(maxHealth * 1);
+		healthBar.value = maxHealth;
 		manaBar.maxValue = maxMana;
-		manaBar.value = (int)(maxMana * 1);
+		manaBar.value = maxMana;
 
 		updateBars ();
 		updateAmmo ();

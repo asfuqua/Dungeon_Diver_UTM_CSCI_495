@@ -79,7 +79,8 @@ public class Enemy : Mover
 	{
 		int x = 0;
 		int y = 0;
-
+		RaycastHit2D hit;
+		bool didMove = false;
 
 		if (checkRange () == true)
 		{
@@ -90,10 +91,23 @@ public class Enemy : Mover
 			if (Mathf.Abs (target.position.x - transform.position.x) < float.Epsilon)
 			{
 				y = target.position.y > transform.position.y ? 1 : -1;
+
+				if(Move(x, y, out hit) == false)
+				{
+					x = target.position.x > transform.position.x ? 1 : -1;
+					y = 0;
+				}
+			
 			}
 			else
 			{
 				x = target.position.x > transform.position.x ? 1 : -1;
+
+				if(Move(x, y, out hit) == false)
+				{
+					y = target.position.y > transform.position.y ? 1 : -1;
+					x = 0;
+				}
 			}
 
 			// PASSES PLAYER AS T VARIABLE IN ORIGINAL CODE

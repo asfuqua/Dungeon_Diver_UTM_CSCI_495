@@ -26,7 +26,7 @@ public class Game : MonoBehaviour
 
 
 	private List<Enemy> enemies;
-	private int level = 30;
+	private int level = 1;
 	private bool enemiesMoving = false;
 	private bool doingSetup = false;
 
