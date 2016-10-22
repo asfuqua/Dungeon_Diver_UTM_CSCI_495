@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class MenuButton : MonoBehaviour 
 {
@@ -26,89 +27,81 @@ public class MenuButton : MonoBehaviour
 	{
 		if (moveOn == true)
 		{
+			if (Input.GetButtonDown ("Fire1"))
+			{
+				Ray click = Camera.main.ScreenPointToRay(Input.mousePosition);
+				click.origin = new Vector3 (Mathf.Round (click.origin.x), Mathf.Round (click.origin.y), 0f);
+
+				int x = (int)click.origin.x - (int)player.transform.position.x;
+				int y = (int)click.origin.y - (int)player.transform.position.y;
+
+
+				if (y == 0)
+				{
+					x = click.origin.x > player.transform.position.x ? 1 : -1;
+				}
+				else if (x == 0)
+				{
+					y = click.origin.y > player.transform.position.y ? 1 : -1;
+				}
+
+				if (x == 0 || y == 0)
+				{
+					player.getIntoAttemptMove (x, y);
+				}
+			}
+		}
+	
+		if (attackOn == true)
+		{
+
+			/* 1,0 is right
+			 * 0,1 is up
+			 * -1, 0 is left
+			 * 0, -1 is down
+			 */
 
 
 			if (Input.GetButtonDown ("Fire1"))
 			{
-				Debug.Log ("Mouse Worked");
-				Debug.Log (Input.mousePosition);
-				//RaycastHit2D click = Physics2D.Linecast (Input.mousePosition - new Vector3(0, 1, 0), Input.mousePosition + new Vector3(0, 1, 0), blockingLayer);
-				//Debug.Log (click.transform);
 				Ray click = Camera.main.ScreenPointToRay(Input.mousePosition);
 				click.origin = new Vector3 (Mathf.Round (click.origin.x), Mathf.Round (click.origin.y), 0f);
-				//click.origin.y = Mathf.Round (click.origin.y);
-				Debug.Log (click);
-				moveOn = false;
+
+				int x = (int)click.origin.x - (int)player.transform.position.x;
+				int y = (int)click.origin.y - (int)player.transform.position.y;
+
+
+				if (y == 0)
+				{
+					x = click.origin.x > player.transform.position.x ? 1 : -1;
+				}
+				else if (x == 0)
+				{
+					y = click.origin.y > player.transform.position.y ? 1 : -1;
+				}
+
+
 			}
-		}
-
-
-		if (attackOn == true)
-		{
-
 		}
 	}
 
 	public void move()
 	{
-		//Debug.Log ("Move!");
+		attackOn = false;
 		moveOn = true;
 	}
 
 	public void attack()
 	{
-		//Debug.Log ("Attack!");
+		moveOn = false;
 		attackOn = true;
 	}
 
-	public void openInventory()
-	{
-		player.Inventory.SetActive (true);
-	}
+
 
 	public void openSettings()
 	{
 		Debug.Log ("Settings opened!");
 	}
 
-	public void equipSword()
-	{
-		if (player.hasSword > 0)
-		{
-			player.equippedWeapon = 1;
-			//player.CurrentEquip.GetComponent<
-		}
-	}
-
-	public void equipSpear()
-	{
-		if (player.hasSpear > 0)
-		{
-			player.equippedWeapon = 2;
-		}
-	}
-
-	public void equipBow()
-	{
-		if (player.hasBow > 0 && player.arrows > 0)
-		{
-			player.equippedWeapon = 3;
-		}
-	}
-
-	public void equipFire()
-	{
-		if (player.hasFireSpell > 0)
-		{
-			player.equippedWeapon = 4;
-		}
-	}
-
-	public void equipIce()
-	{
-		if (player.hasIceSpell > 0)
-		{
-			player.equippedWeapon = 5;
-		}
-	}
 }

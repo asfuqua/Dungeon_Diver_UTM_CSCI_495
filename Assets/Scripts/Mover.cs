@@ -76,5 +76,9 @@ public abstract class Mover : MonoBehaviour
 	protected abstract void OnCantMove<T> (T component)
 		where T : Component;
 
+	public void getIntoAttemptMove(int x, int y)
+	{
+		AttemptMove<Enemy> (x, y);
+	}
 
 }

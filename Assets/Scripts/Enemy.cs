@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Enemy : Mover 
 {
-	public int playerDamage;
+	
 	public int enemyHealth;
 	public int enemyMaxHealth;
 	public int range;
@@ -18,10 +18,6 @@ public class Enemy : Mover
 
 	protected override void Start()
 	{
-		range = 1;
-		//damage = 5;
-		enemyHealth = 10;
-		enemyMaxHealth = 10;
 		Game.instance.addEnemy (this);
 		animator = GetComponent<Animator> ();
 		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<Player>();
@@ -57,7 +53,6 @@ public class Enemy : Mover
 
 	public void takeDamage(int damage)
 	{
-		Debug.Log ("Enemy Hit!");
 		enemyHealth -= damage;
 		float percentage = (float)enemyHealth / (float)enemyMaxHealth;
 

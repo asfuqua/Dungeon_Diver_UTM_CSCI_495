@@ -6,15 +6,12 @@ using Random = UnityEngine.Random;
 public class Board : MonoBehaviour
 {
 	// SINGLE USE VARIABLES
-	public GameObject exit;
-	public int columns;
-	public int rows;
-	public GameObject movementIndicator;
+	public GameObject exit;																// The Exit GameObject "Ladder" that sends the player to the next level
+	public int columns;																	// The number of columns in each rectangular room, is randomized for each room
+	public int rows;																	// The number of rows in each rectangular room, is randomized for each room
 
-
-	public GameObject instance;
-	private int zRotate;
-	private int randomLevel;
+	public GameObject instance;															// public accessor of singleton board script
+	private int randomTheme;
 
 
 	private Transform boardHolder;
@@ -23,6 +20,8 @@ public class Board : MonoBehaviour
 	private List<Vector3> grid = new List<Vector3> ();
 	private List<Vector3> playableArea = new List<Vector3> ();
 	public List<GameObject> floorSpaces = new List<GameObject> ();
+
+	private List<int> themePermutation;
 
 	// ITEMS
 	public GameObject[] items;
@@ -51,37 +50,23 @@ public class Board : MonoBehaviour
 	public GameObject dungeonFloor;
 	public GameObject[] dungeonWalls;
 
-
-	void InitializeWholeBoard()
-	{
-		grid.Clear ();
-
-		for (int x = -10; x < 40; x++)
-		{
-			for (int y = -10; y < 40; y++)
-			{
-				grid.Add(new Vector3(x, y, 0f));
-			}
-		}
-
-	}
+	//FUNCTIONS--------------------------------------------------------------------------------------------------------
 
 	public void makeLevel(int level)
 	{
 		boardHolder = new GameObject ("BoardHolder").transform;
 
 
-		InitializeWholeBoard ();
-		randomLevel = Random.Range (0, 5);
+
+
+		InitializeWholeBoard ();									// Places Vector3 points in empty list
+		randomTheme = Random.Range (0, 5);							// Gets a random int between 0 and 4
 		//randomLevel = 4;
-		makeBoard (randomLevel);
-
-
-		FillEmptySpaceWithWalls (randomLevel);
-
-		//InitializePlayableArea ();
-		placeObjectAtRandom (items, 5, 15);
-		int enemyCount = (int)Mathf.Log (level, 2f);
+		makeBoard (randomTheme);									// makes the rooms and hallways, places floor tiles on the points, moving each point that is used to another list
+		FillEmptySpaceWithWalls (randomTheme);						// puts a wall tile on every point that is left in the original list
+		placeObjectAtRandom (items, 5, 15);							// places random items at points that are available in rooms, ie FLoor tiles
+		int enemyCount = level;										
+		//int enemyCount = (int)Mathf.Log (level, 2f);
 		if (enemyCount == 0)
 		{
 			enemyCount = 1;
@@ -91,86 +76,6 @@ public class Board : MonoBehaviour
 		Instantiate (exit, playableArea [Random.Range (0, playableArea.Count)], Quaternion.identity);
 
 	}
-
-	Vector3 randomPosition()
-	{
-		int randomIndex = Random.Range (0, playableArea.Count);
-		Vector3 randomPosition = playableArea [randomIndex];
-		playableArea.RemoveAt (randomIndex);
-		return randomPosition;
-
-	}
-
-
-	void placeObjectAtRandom(GameObject[] objects, int minimum, int maximum)
-	{
-		Vector3 position;
-
-		int objectCount = Random.Range (minimum, maximum + 1);
-
-		for (int i = 0; i < objectCount; i++)
-		{
-			position = randomPosition ();
-			GameObject tileChoice = objects [Random.Range (0, objects.Length)];
-			Instantiate (tileChoice, position, Quaternion.identity);
-
-		}
-	}
-
-	void FillEmptySpaceWithWalls(int theme)
-	{
-		GameObject currentTile;
-
-
-		for (int x = 0; x < grid.Count; x++)
-		{
-			Vector3 position = grid [x];
-
-			switch (theme)
-			{
-				case 0:
-					instance = Instantiate (grassWall, position, Quaternion.identity) as GameObject;
-					instance.transform.SetParent (boardHolder);
-					break;
-				case 1:
-					instance = Instantiate (iceWall, position, Quaternion.identity) as GameObject;
-					instance.transform.SetParent (boardHolder);
-					break;
-				case 2:
-					currentTile = dungeonWalls [Random.Range (0, dungeonWalls.Length)];
-					instance = Instantiate (currentTile, position, Quaternion.identity) as GameObject;
-					instance.transform.SetParent (boardHolder);
-					break;
-				case 3:
-					currentTile = lavaWall [Random.Range (0, lavaWall.Length)];
-					instance = Instantiate (currentTile, position, Quaternion.identity) as GameObject;
-					instance.transform.SetParent (boardHolder);
-					break;
-				case 4:
-					instance = Instantiate (desertWall, position, Quaternion.identity) as GameObject;
-					instance.transform.SetParent (boardHolder);
-					break;
-				default:
-					break;
-			}
-		}
-
-		grid.Clear ();
-	}
-
-	void RemovePossibilityFromGrid(int x, int y)
-	{
-		for (int i = 0; i < grid.Count; i++)
-		{
-			if (grid [i].x == x && grid [i].y == y)
-			{
-				grid.RemoveAt (i);
-				playableArea.Add (new Vector3 (x, y, 0f));
-			}
-		}
-	}
-
-
 
 	public void makeBoard(int theme)
 	{
@@ -236,7 +141,7 @@ public class Board : MonoBehaviour
 					}
 					//floorSpaces.Add (instance);
 					RemovePossibilityFromGrid (x, y);
-					
+
 				}
 
 			}
@@ -308,139 +213,96 @@ public class Board : MonoBehaviour
 
 	}
 
-	/*
-	public void makeIce ()
+	Vector3 randomPosition()
 	{
-		for (int x = 0; x <= columns + 1; x++)
-		{
-			for (int y = 0; y <= rows + 1; y++)
-			{
-				zRotate = 0;
-				GameObject currentTile = snowFloor;
-
-				if (y == 0)
-				{
-					currentTile = snowBOTH;
-				}
-				else if (y == columns + 1)
-				{
-					currentTile = snowTOPH;
-				}
-				else if (x == 0)
-				{
-					currentTile = snowLEFTV;
-				}
-				else if (x == rows + 1)
-				{
-					currentTile = snowRIGHTV;
-				}
-				if (x == 0 && y == 0)
-				{
-					currentTile = snowBL;
-				}
-				else if (x == 0 && y == columns + 1)
-				{
-					currentTile = snowTL;
-				}
-				else if (x == rows + 1 && y == columns + 1)
-				{
-					currentTile = snowTR;
-				}
-				else if (x == rows + 1 && y == 0)
-				{
-					currentTile = snowBR;
-				}
-
-				
-				
-
-				GameObject instance = Instantiate (currentTile, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
-				RemovePossibilityFromGrid(x, y);
-				//instance.transform.SetParent (Board);
-			}
-
-		}
+		int randomIndex = Random.Range (0, playableArea.Count);
+		Vector3 randomPosition = playableArea [randomIndex];
+		playableArea.RemoveAt (randomIndex);
+		return randomPosition;
 
 	}
-	public void makeDungeon ()
-	{
-		for (int x = 0; x <= columns + 1; x++)
-		{
-			for (int y = 0; y <= rows + 1; y++)
-			{
-				GameObject currentTile = dungeonFloor;
 
-				if (x == 0 || x == rows + 1 || y == 0 || y == columns + 1)
-				{
+	void placeObjectAtRandom(GameObject[] objects, int minimum, int maximum)
+	{
+		Vector3 position;
+
+		int objectCount = Random.Range (minimum, maximum + 1);
+
+		for (int i = 0; i < objectCount; i++)
+		{
+			position = randomPosition ();
+			GameObject tileChoice = objects [Random.Range (0, objects.Length)];
+			Instantiate (tileChoice, position, Quaternion.identity);
+
+		}
+	}
+
+	void FillEmptySpaceWithWalls(int theme)
+	{
+		GameObject currentTile;
+
+
+		for (int x = 0; x < grid.Count; x++)
+		{
+			Vector3 position = grid [x];
+
+			switch (theme)
+			{
+				case 0:
+					instance = Instantiate (grassWall, position, Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					break;
+				case 1:
+					instance = Instantiate (iceWall, position, Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					break;
+				case 2:
 					currentTile = dungeonWalls [Random.Range (0, dungeonWalls.Length)];
-				}
-
-				GameObject instance = Instantiate (currentTile, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
-				RemovePossibilityFromGrid(x, y);
-				//instance.transform.SetParent (Board);
+					instance = Instantiate (currentTile, position, Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					break;
+				case 3:
+					currentTile = lavaWall [Random.Range (0, lavaWall.Length)];
+					instance = Instantiate (currentTile, position, Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					break;
+				case 4:
+					instance = Instantiate (desertWall, position, Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					break;
+				default:
+					break;
 			}
-
 		}
+
+		grid.Clear ();
 	}
-	public void makeFire ()
+
+	void RemovePossibilityFromGrid(int x, int y)
 	{
-
-		for (int x = 0; x <= columns + 1; x++)
+		for (int i = 0; i < grid.Count; i++)
 		{
-			for (int y = 0; y <= rows + 1; y++)
+			if (grid [i].x == x && grid [i].y == y)
 			{
-				zRotate = 0;
-				GameObject currentTile = lavaTiles [Random.Range (0, lavaTiles.Length)];
-
-				if (x == 0 || x == rows + 1 || y == 0 || y == columns + 1)
-				{
-
-					if (y == 0 || y == columns + 1)
-					{
-						currentTile = lavaWallsHorizontal [Random.Range (0, lavaWallsHorizontal.Length)];
-					}
-					else if (x == 0 || x == rows + 1)
-					{
-						currentTile = lavaWallsVertical [Random.Range (0, lavaWallsVertical.Length)];
-					}
-
-
-					if (x == 0 && y == 0)
-					{
-						currentTile = lavaCorner;
-						zRotate = 0;
-					}
-					else if (x == 0 && y == columns + 1)
-					{
-						currentTile = lavaCorner;
-						zRotate = 270;
-					}
-					else if (x == rows + 1 && y == columns + 1)
-					{
-						currentTile = lavaCorner;
-						zRotate = 180;
-					}
-					else if (x == rows + 1 && y == 0)
-					{
-						currentTile = lavaCorner;
-						zRotate = 90;
-					}
-
-				
-				}
-
-				GameObject instance = Instantiate (currentTile, new Vector3 (x, y, 0f), Quaternion.Euler (0, 0, zRotate)) as GameObject;
-				RemovePossibilityFromGrid(x, y);
-				//instance.transform.SetParent ("Board");
+				grid.RemoveAt (i);
+				playableArea.Add (new Vector3 (x, y, 0f));
 			}
 		}
 	}
 
-*/
+	void InitializeWholeBoard()
+	{
+		grid.Clear ();
 
+		for (int x = -10; x < 40; x++)
+		{
+			for (int y = -10; y < 40; y++)
+			{
+				grid.Add(new Vector3(x, y, 0f));
+			}
+		}
 
-
-
+	}
 
 
 }

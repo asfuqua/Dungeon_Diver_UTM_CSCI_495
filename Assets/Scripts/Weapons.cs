@@ -27,69 +27,109 @@ public class Weapons : MonoBehaviour
 
 
 
+	void Awake()
+	{
+		if (instance == null)
+		{
+			instance = this;
+		}
+		else if (instance != null)
+		{
+			Destroy (gameObject);
+		}
+
+		DontDestroyOnLoad (gameObject);
+	}
+
+
 
 	void Start ()
 	{
 		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<Player> ();
-		instance = this;
+		inventory = Game.instance.inventory;
+		updateInventory ();
+	}
 
-		inventory = new List<Slot> ();
+	void OnDisable()
+	{
+		Game.instance.inventory = inventory;
 	}
 
 
 	public void sword()
 	{
 		invSlot = new Slot (swordSprite, "Sword", 10);
-		
-
-		inventory.Add(invSlot);
-		//Debug.Log(inventory[
+		addSlot (invSlot);
 		updateInventory ();
-		//player.hasSword += 10;
-		//player.updateAmmo ();
 	}
 
 	public void spear()
 	{
-		player.hasSpear += 10;
-		player.updateAmmo ();
+		invSlot = new Slot (spearSprite, "Spear", 10);
+		addSlot (invSlot);
+		updateInventory ();
 	}
 
 	public void bow()
 	{
-		player.hasBow += 10;
-		player.updateAmmo ();
+		invSlot = new Slot (bowSprite, "Bow", 10);
+		addSlot (invSlot);
+		updateInventory ();
 	}
 
 	public void arrowBundle()
 	{
-		player.arrows += Random.Range (3, 10);
-		player.updateAmmo ();
+		invSlot = new Slot (arrowSprite, "Arrow", 10);
+		addSlot (invSlot);
+		updateInventory ();
 	}
 
 	public void fireSpell()
 	{
-		player.hasFireSpell += 10;
-		player.updateAmmo ();
+		invSlot = new Slot (fireSprite, "Fire", 10);
+		addSlot (invSlot);
+		updateInventory ();
 	}
 
 	public void iceSpell()
 	{
-		player.hasIceSpell += 10;
-		player.updateAmmo ();
+		invSlot = new Slot (iceSprite, "Ice", 10);
+		addSlot (invSlot);
+		updateInventory ();
 	}
 
-
-
+	public bool addSlot(Slot passed)
+	{
+		for (int i = 0; i < inventory.Count; i++)
+		{
+			if (inventory [i].name == passed.name)
+			{
+				inventory [i].durability += passed.durability;
+				return true;
+			}
+		}
+			
+		inventory.Add(invSlot);
+		return false;
+	}
 
 
 	public void updateInventory()
 	{
 		for (int i = 0; i < inventory.Count; i++)
 		{
-			inventoryTexts [i].text = inventory [i].name + " " + inventory [i].durability;
+			inventoryTexts [i].text = inventory [i].name + " : " + inventory [i].durability.ToString().PadRight(3);
+			inventoryButtons [i].interactable = true;
+			inventoryButtons [i].image.sprite = inventory [i].sprite;
 		}
 	}
 
 
+	public void equip(int index)
+	{
+		Debug.Log (index);
+
+		Player.instance.equippedWeapon = inventory[index].name;
+		Player.instance.CurrentEquip.sprite = inventory [index].sprite;
+	}
 }

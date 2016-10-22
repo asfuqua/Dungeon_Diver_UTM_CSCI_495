@@ -2,42 +2,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Player : Mover 
 {
+	public static Player instance;
+	public Projectile arrow;
 
 	// PLAYER STATS
-	//public int health;
-	public int maxHealth;
-	//public int mana;
-	public int maxMana;
-	public int atk;
-	public int equippedWeapon;
+	public int health;
+	public int maxHealth;				// The max health of the player
+	public int mana;
+	public int maxMana;					// the max mana of the player
+	public int atk;						// the attack value of the player
+	public string equippedWeapon;		// An string code representing the currently equipped weapon
 
 	// ITEM TURN DECAYERS
-	public int damageIncrease;
-	public int movementIncrease;
-	public int hasSword;
-	public int hasSpear;
-	public int hasBow;
-	public int arrows;
-	public int hasFireSpell;
-	public int hasIceSpell;
+	public int damageIncrease;			// The value for the number of turns the Damage potion is active
+	public int movementIncrease;		// The value for the number of turns the Movement potion is active
 
 	// UI ELEMENTS OF PLAYER
-	public Slider healthBar;
-	public Slider manaBar;
-	public Text healthText;
-	public Text manaText;
-	public GameObject Inventory;
-	public GameObject AmmoPanel;
-	public Text SwordText;
-	public Text SpearText;
-	public Text BowText;
-	public Text ArrowText;
-	public Text FireText;
-	public Text IceText;
-	public Image CurrentEquip;
+	public Slider healthBar;			// The Ui Element to represent health
+	public Slider manaBar;				// the Ui Element to represent mana
+	public Text healthText;				// The overlay text for the health bar
+	public Text manaText;				// The overlay text for the mana bar
+	public GameObject AmmoPanel;		// The UI Element holding the inventory and their durability values 
+	public Image CurrentEquip;			// the image showing the currently equipped weapon
 
 
 	// VARIABLES USED IN MOVEMENT INDICATORS
@@ -54,32 +44,64 @@ public class Player : Mover
 	private SpriteRenderer spriterenderer;
 
 
+
+	void Awake()
+	{
+		Debug.Log ("Awake is being called!");
+
+		if (instance == null)
+		{
+			instance = this;
+		}
+		else if (instance != null)
+		{
+			Destroy (gameObject);
+		}
+			
+		DontDestroyOnLoad (gameObject);
+
+		/*healthBar = FindObjectOfType<UnityEngine.UI.Slider> ("Health Bar");
+		manaBar = GameObject.FindGameObjectWithTag ("Mana Bar");			
+		healthText = GameObject.FindGameObjectWithTag ("Health Text");		
+		manaText = GameObject.FindGameObjectWithTag ("Mana Text");
+		AmmoPanel = GameObject.FindGameObjectWithTag ("AmmoPanel");
+		CurrentEquip = GameObject.FindGameObjectWithTag ("CurrentEquip");
+*/
+		//updateBars ();
+	}
+
+
 	protected override void Start()
 	{
-		animator = GetComponent <Animator> ();
-		spriterenderer = GetComponent<SpriteRenderer> ();
-		maxHealth = 10;
-		maxMana = 10;
-		damageIncrease = 0;
-		movementIncrease = 0;
-		hasSword = 0;
-		hasSpear = 0;
-		hasBow = 0;
-		arrows = 30;
-		hasFireSpell = 0;
-		hasIceSpell = 0;
-		atk = 4;
-		equippedWeapon = 0;
+		arrow.shoot ();
+		Debug.Log ("Start is being called!");
+
+		if (Game.instance.firstLevel == true)
+		{
+			Debug.Log ("First Level Happened");
+			animator = GetComponent <Animator> ();
+			spriterenderer = GetComponent<SpriteRenderer> ();
+			maxHealth = 10;
+			maxMana = 10;
+			damageIncrease = 0;
+			movementIncrease = 0;
+			atk = 4;
+			equippedWeapon = "null";
+			health = 10;
+			mana = 10;
 
 
-		healthBar.maxValue = maxHealth;
-		healthBar.value = maxHealth;
-		manaBar.maxValue = maxMana;
-		manaBar.value = maxMana;
+			healthBar.maxValue = maxHealth;
+			healthBar.value = health;
+			manaBar.maxValue = maxMana;
+			manaBar.value = mana;
+
+			//updateBars ();
+		}
+
 
 		updateBars ();
-		updateAmmo ();
-
+		
 		/*
 		player = GameObject.FindGameObjectWithTag ("Player").transform;
 
@@ -101,6 +123,7 @@ public class Player : Mover
 				floorSpace == playerPosition + new Vector3(-1,0,0f) ||
 				floorSpace == playerPosition + new Vector3(0,-1,0f) ||
 				floorSpace == playerPosition + new Vector3(-1, -1, 0f)
+				
 			)
 			{
 				GameObject instance = Instantiate (Game.instance.boardScript.movementIndicator, floorSpace, Quaternion.identity) as GameObject;
@@ -108,8 +131,8 @@ public class Player : Mover
 			}
 		}
 
-
 		*/
+		
 
 
 
@@ -119,11 +142,14 @@ public class Player : Mover
 
 	void Update()
 	{
+		
+
+
 		if(!Game.instance.playersTurn)
 		{
 			return;
 		}
-			
+
 
 		/*if (movementSpaces.Count != 0)
 		{
@@ -163,7 +189,6 @@ public class Player : Mover
 	protected override void AttemptMove<T>(int x, int y)
 	{
 		base.AttemptMove<T>(x, y);
-
 		RaycastHit2D hit;
 		/*if (Move (x, y, out hit))
 		{
@@ -230,18 +255,19 @@ public class Player : Mover
 				Weapons.instance.iceSpell ();
 				other.gameObject.SetActive (false);
 				break;
-
+			case "Exit":
+				Invoke("Restart", restartLevelDelay);
+				break;
 			default:
 				break;
 
 		}
-
-
 	}
 
 	protected void Restart()
 	{
-		Application.LoadLevel (Application.loadedLevel);
+		//Application.LoadLevel (Application.loadedLevel);
+		SceneManager.LoadScene("Main", LoadSceneMode.Single);
 	}
 
 	public void gainHealth(int gain)
@@ -253,6 +279,7 @@ public class Player : Mover
 	public void loseHealth(int loss)
 	{
 		healthBar.value -= loss;
+		health = (int)healthBar.value;
 		updateBars ();
 	}
 
@@ -274,16 +301,6 @@ public class Player : Mover
 		manaText.text = manaBar.value + " / " + maxMana;
 	}
 
-	public void updateAmmo()
-	{
-		SwordText.text = "Sword: " + hasSword.ToString().PadRight(3);
-		SpearText.text = "Spear: " + hasSpear.ToString().PadRight(3);
-		BowText.text = "Bow: " + hasBow.ToString().PadRight(3);
-		ArrowText.text = "Arrows: " + arrows.ToString().PadRight(3);
-		FireText.text = "Fire: " + hasFireSpell.ToString().PadRight(3);
-		IceText.text = "Ice: " + hasIceSpell.ToString().PadRight(3);
-	}
-
 	private void CheckIfGameOver()
 	{
 		/*if (health <= 0)
@@ -294,11 +311,30 @@ public class Player : Mover
 	}
 
 
+
 	protected override void OnCantMove<T>(T Component)
 	{
 		Enemy hitEnemy = Component as Enemy;
 		WeaponAnimation.GetComponent<Animator>().SetTrigger ("swordSwing");
 		hitEnemy.takeDamage (atk);
 
+	}
+
+	void OnDisable()
+	{
+		/*health = (int)healthBar.value;
+
+		mana = (int)manaBar.value;
+
+		Debug.Log (health + ", " + mana); */
+
+		Game.instance.firstLevel = false;
+
+
+	}
+
+	public void getIntoAttemptMove(int x, int y)
+	{
+		AttemptMove<Enemy> (x, y);
 	}
 }

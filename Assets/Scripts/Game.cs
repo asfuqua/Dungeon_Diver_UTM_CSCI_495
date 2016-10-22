@@ -13,8 +13,14 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 
 
-public class Game : MonoBehaviour 
+public class Game : MonoBehaviour
 {
+	public List<Slot> inventory;
+	private List<int> themePermutation;
+
+
+
+	public bool firstLevel = true;
 	public float levelStartDelay = 2f;
 	public float turnDelay = 0.1f;
 	public static Game instance = null;
@@ -26,7 +32,7 @@ public class Game : MonoBehaviour
 
 
 	private List<Enemy> enemies;
-	private int level = 1;
+	public int level = 1;
 	private bool enemiesMoving = false;
 	private bool doingSetup = false;
 
@@ -41,6 +47,19 @@ public class Game : MonoBehaviour
 			Destroy (gameObject);
 		}
 
+		inventory = new List<Slot> ();
+		themePermutation = new List<int> ();
+
+		for (int i = 0; i < 5; i++)
+		{
+			themePermutation.Add (i);
+		}
+		for (int i = 0; i < 5; i++)
+		{
+			swap (Random.Range (0, 5), Random.Range (0, 5));
+		}
+
+
 		instance.enabled = true;
 		DontDestroyOnLoad (gameObject);
 		enemies = new List<Enemy> ();
@@ -48,17 +67,20 @@ public class Game : MonoBehaviour
 		InitGame ();
 	}
 
-	private void levelLoaded(int index)
+	private void OnLevelWasLoaded(int index)
 	{
 		level++;
-		InitGame ();
+		Player.instance.transform.position = new Vector3(3f, 3f, 0f);
+		Player.instance.updateBars ();
+		//Player.instance.transform.position = 0f;
+		//InitGame ();
 	}
 
 	void InitGame()
 	{
 		//doingSetup = true;
-		//Invoke ("hideLevelImage", levelStartDelay)
-
+		//Invoke ("hideLevelImage", levelStartDelay);
+		//Weapons.instance.inventory = inventory;
 		//enemies.Clear ();
 
 		boardScript.makeLevel (level);
@@ -124,5 +146,12 @@ public class Game : MonoBehaviour
 		playersTurn = true;
 		enemiesMoving = false;
 
+	}
+
+	void swap(int first, int second)
+	{
+		int temp = themePermutation[first];
+		themePermutation [first] = themePermutation [second];
+		themePermutation [second] = temp;
 	}
 }

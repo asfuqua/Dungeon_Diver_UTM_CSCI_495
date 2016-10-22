@@ -2,7 +2,7 @@
 using System.Collections;
 using UnityEngine.UI;
 
-public class Slot : MonoBehaviour 
+public class Slot
 {
 	public Sprite sprite;
 	public string name;
@@ -14,6 +14,9 @@ public class Slot : MonoBehaviour
 		name = n;
 		durability = d;
 	}
+
+
+
 
 
 }
