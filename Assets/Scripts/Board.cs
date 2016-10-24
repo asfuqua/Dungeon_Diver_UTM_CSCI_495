@@ -64,9 +64,10 @@ public class Board : MonoBehaviour
 		//randomLevel = 4;
 		makeBoard (randomTheme);									// makes the rooms and hallways, places floor tiles on the points, moving each point that is used to another list
 		FillEmptySpaceWithWalls (randomTheme);						// puts a wall tile on every point that is left in the original list
-		placeObjectAtRandom (items, 5, 15);							// places random items at points that are available in rooms, ie FLoor tiles
-		int enemyCount = level;										
+		placeObjectAtRandom (items, 5, 15);							// places random items at points that are available in rooms, ie FLoor tiles									
 		//int enemyCount = (int)Mathf.Log (level, 2f);
+		int enemyCount = level;
+		Debug.Log (enemyCount);
 		if (enemyCount == 0)
 		{
 			enemyCount = 1;
@@ -139,7 +140,6 @@ public class Board : MonoBehaviour
 						default:
 							break;
 					}
-					//floorSpaces.Add (instance);
 					RemovePossibilityFromGrid (x, y);
 
 				}

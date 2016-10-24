@@ -7,7 +7,6 @@ using UnityEngine.SceneManagement;
 public class Player : Mover 
 {
 	public static Player instance;
-	public Projectile arrow;
 
 	// PLAYER STATS
 	public int health;
@@ -16,6 +15,15 @@ public class Player : Mover
 	public int maxMana;					// the max mana of the player
 	public int atk;						// the attack value of the player
 	public string equippedWeapon;		// An string code representing the currently equipped weapon
+	public int equippedIndex;			// A int variable representing the index of the currently equipped weapon from the inventory array
+
+
+
+	// PROJECTILES
+	public GameObject projectile;		// Arrow Projectile Prefab
+	public Sprite arrow;				// arrow Sprite for projectile prefab
+	public Sprite ice;					// ice spike sprite for projectile prefab
+	public Sprite fire;					// fireball sprite for projectile prefab
 
 	// ITEM TURN DECAYERS
 	public int damageIncrease;			// The value for the number of turns the Damage potion is active
@@ -28,7 +36,11 @@ public class Player : Mover
 	public Text manaText;				// The overlay text for the mana bar
 	public GameObject AmmoPanel;		// The UI Element holding the inventory and their durability values 
 	public Image CurrentEquip;			// the image showing the currently equipped weapon
-
+	public Image moveBuff;				
+	public Image dmgBuff;
+	public Sprite uiMask;
+	public Sprite moveSprite;
+	public Sprite damageSprite;
 
 	// VARIABLES USED IN MOVEMENT INDICATORS
 	//public Vector3 playerPosition;
@@ -59,7 +71,7 @@ public class Player : Mover
 		}
 			
 		DontDestroyOnLoad (gameObject);
-
+		uiMask = CurrentEquip.sprite;
 		/*healthBar = FindObjectOfType<UnityEngine.UI.Slider> ("Health Bar");
 		manaBar = GameObject.FindGameObjectWithTag ("Mana Bar");			
 		healthText = GameObject.FindGameObjectWithTag ("Health Text");		
@@ -70,35 +82,24 @@ public class Player : Mover
 		//updateBars ();
 	}
 
-
 	protected override void Start()
 	{
-		arrow.shoot ();
-		Debug.Log ("Start is being called!");
-
-		if (Game.instance.firstLevel == true)
-		{
-			Debug.Log ("First Level Happened");
-			animator = GetComponent <Animator> ();
-			spriterenderer = GetComponent<SpriteRenderer> ();
-			maxHealth = 10;
-			maxMana = 10;
-			damageIncrease = 0;
-			movementIncrease = 0;
-			atk = 4;
-			equippedWeapon = "null";
-			health = 10;
-			mana = 10;
+		//animator = GetComponent <Animator> ();
+		//spriterenderer = GetComponent<SpriteRenderer> ();
+		maxHealth = 50;
+		maxMana = 10;
+		damageIncrease = 0;
+		movementIncrease = 0;
+		atk = 1;
+		equippedWeapon = "Dagger";
+		health = 50;
+		mana = 10;
 
 
-			healthBar.maxValue = maxHealth;
-			healthBar.value = health;
-			manaBar.maxValue = maxMana;
-			manaBar.value = mana;
-
-			//updateBars ();
-		}
-
+		healthBar.maxValue = maxHealth;
+		healthBar.value = health;
+		manaBar.maxValue = maxMana;
+		manaBar.value = mana;
 
 		updateBars ();
 		
@@ -201,14 +202,158 @@ public class Player : Mover
 		if (damageIncrease > 0)
 		{
 			damageIncrease--;
+
+			if (damageIncrease == 0)
+			{
+				dmgBuff.sprite = uiMask;
+			}
 		}
 		if (movementIncrease > 0)
 		{
 			movementIncrease--;
+
+			if (movementIncrease == 0)
+			{
+				moveBuff.sprite = uiMask;
+			}
 		}
 
 
 		Game.instance.playersTurn = false;
+	}
+
+	public void attack(float cardinal, Enemy target)
+	{
+		if (cardinal == 0f)
+		{
+			WeaponAnimation.transform.rotation = Quaternion.Euler (0f, 0f, cardinal);
+		}
+		else if (cardinal == 90f)
+		{
+			WeaponAnimation.transform.rotation = Quaternion.Euler (0f, 0f, cardinal);
+		}
+		else if (cardinal == 180f)
+		{
+			WeaponAnimation.transform.rotation = Quaternion.Euler (0f, 0f, cardinal);
+		}
+		else if (cardinal == 270f)
+		{
+			WeaponAnimation.transform.rotation = Quaternion.Euler (0f, 0f, cardinal);
+		}
+
+		switch (equippedWeapon)
+		{
+
+			case "Dagger": 
+				WeaponAnimation.GetComponent<Animator> ().SetTrigger ("swordSwing");
+				calculateDamage (target);
+				break;
+			case "Sword": 
+				WeaponAnimation.GetComponent<Animator> ().SetTrigger ("swordSwing");
+				calculateDamage (target);
+				loseDurability();
+				break;
+			case "Spear":
+				WeaponAnimation.GetComponent<Animator> ().SetTrigger ("spearStab");
+				calculateDamage (target);
+				loseDurability();
+				break;
+			case "Bow":
+				WeaponAnimation.GetComponent<Animator> ().SetTrigger ("fireBow");
+				makeProjectile (cardinal);
+				loseDurability();
+				break;
+			case "Fire":
+				if (mana > 2)
+				{
+					WeaponAnimation.GetComponent<Animator> ().SetTrigger ("fireCast");
+					loseMana (2);
+					makeProjectile (cardinal);
+					loseDurability();;
+				}
+				break;
+			case "Ice":
+				if (mana > 2)
+				{
+					WeaponAnimation.GetComponent<Animator> ().SetTrigger ("iceCast");
+					loseMana (2);
+					makeProjectile (cardinal);
+					loseDurability();
+				}
+				break;
+		}
+
+		Game.instance.playersTurn = false;
+	}
+
+	private void makeProjectile(float cardinal)
+	{
+		Vector3 position = new Vector3 (0f, 0f, 0f);
+		if (damageIncrease > 0)
+		{
+			projectile.GetComponent<Projectile> ().damage = (atk + Weapons.instance.inventory [equippedIndex].damageModifier) * 2;
+		}
+		else
+		{
+			projectile.GetComponent<Projectile> ().damage = atk + Weapons.instance.inventory [equippedIndex].damageModifier;
+		}
+
+		if (cardinal == 0)
+		{
+			projectile.GetComponent<Projectile> ().xDirection = 1;
+			projectile.GetComponent<Projectile> ().yDirection = 0;
+
+			position = new Vector3 (this.transform.position.x + 1, this.transform.position.y, 0f);
+		}
+		else if (cardinal == 90)
+		{
+			projectile.GetComponent<Projectile> ().xDirection = 0;
+			projectile.GetComponent<Projectile> ().yDirection = 1;
+
+			position = new Vector3 (this.transform.position.x, this.transform.position.y + 1, 0f);
+		}
+		else if (cardinal == 180)
+		{
+			projectile.GetComponent<Projectile> ().xDirection = -1;
+			projectile.GetComponent<Projectile> ().yDirection = 0;
+
+			position = new Vector3 (this.transform.position.x - 1, this.transform.position.y, 0f);
+		}
+		else if (cardinal == 270)
+		{
+			projectile.GetComponent<Projectile> ().xDirection = 0;
+			projectile.GetComponent<Projectile> ().yDirection = -1;
+
+			position = new Vector3 (this.transform.position.x, this.transform.position.y - 1, 0f);
+		}
+
+
+		if (equippedWeapon == "Bow")
+		{
+			projectile.GetComponent<SpriteRenderer> ().sprite = arrow;
+
+			Instantiate(projectile, position, Quaternion.Euler (0f, 0f, cardinal));
+		}
+
+
+		switch (equippedWeapon)
+		{
+			case "Bow":
+				projectile.GetComponent<SpriteRenderer> ().sprite = arrow;
+				Instantiate(projectile, position, Quaternion.Euler(0f, 0f, cardinal));
+				break;
+			case "Fire":
+				projectile.GetComponent<SpriteRenderer> ().sprite = fire;
+				Instantiate(projectile, position, Quaternion.Euler(0f, 0f, cardinal));
+				break;
+			case "Ice":
+				projectile.GetComponent<SpriteRenderer> ().sprite = ice;
+				Instantiate(projectile, position, Quaternion.Euler(0f, 0f, cardinal));
+				break;
+		}
+
+
+
 	}
 
 	private void OnTriggerEnter2D(Collider2D other)
@@ -225,10 +370,12 @@ public class Player : Mover
 				break;
 			case "Speed Potion":
 				Potion.instance.speedPotion ();
+				moveBuff.sprite = moveSprite;
 				other.gameObject.SetActive(false);
 				break;
 			case "Damage Potion":
 				Potion.instance.damagePotion ();
+				dmgBuff.sprite = damageSprite;
 				other.gameObject.SetActive(false);
 				break;
 			case "Sword":
@@ -264,12 +411,6 @@ public class Player : Mover
 		}
 	}
 
-	protected void Restart()
-	{
-		//Application.LoadLevel (Application.loadedLevel);
-		SceneManager.LoadScene("Main", LoadSceneMode.Single);
-	}
-
 	public void gainHealth(int gain)
 	{
 		healthBar.value += gain;
@@ -278,6 +419,7 @@ public class Player : Mover
 
 	public void loseHealth(int loss)
 	{
+		Debug.Log ("Health lost!");
 		healthBar.value -= loss;
 		health = (int)healthBar.value;
 		updateBars ();
@@ -293,6 +435,40 @@ public class Player : Mover
 	{
 		manaBar.value -= loss;
 		updateBars ();
+	}
+
+	private void loseDurability()
+	{
+		Weapons.instance.inventory [equippedIndex].durability--;
+		Weapons.instance.checkToRemove (equippedIndex);
+		Weapons.instance.updateInventory ();
+	}
+
+	private void calculateDamage(Enemy target)
+	{
+		if (equippedWeapon == "Dagger")
+		{
+			if (damageIncrease > 0)
+			{
+				target.takeDamage (atk * 2);
+			}
+			else
+			{
+				target.takeDamage (atk);
+			}
+		}
+		else
+		{
+			if (damageIncrease > 0)
+			{
+				target.takeDamage ((atk + Weapons.instance.inventory [equippedIndex].damageModifier) * 2);
+			}
+			else
+			{
+				target.takeDamage (atk + Weapons.instance.inventory [equippedIndex].damageModifier);
+			}
+
+		}
 	}
 
 	public void updateBars()
@@ -320,19 +496,11 @@ public class Player : Mover
 
 	}
 
-	void OnDisable()
+	protected void Restart()
 	{
-		/*health = (int)healthBar.value;
-
-		mana = (int)manaBar.value;
-
-		Debug.Log (health + ", " + mana); */
-
-		Game.instance.firstLevel = false;
-
-
+		SceneManager.LoadScene("Main", LoadSceneMode.Single);
 	}
-
+		
 	public void getIntoAttemptMove(int x, int y)
 	{
 		AttemptMove<Enemy> (x, y);

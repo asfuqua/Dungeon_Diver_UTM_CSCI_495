@@ -15,7 +15,7 @@ using UnityEngine.UI;
 
 public class Game : MonoBehaviour
 {
-	public List<Slot> inventory;
+	//public List<Slot> inventory;
 	private List<int> themePermutation;
 
 
@@ -31,7 +31,7 @@ public class Game : MonoBehaviour
 
 
 
-	private List<Enemy> enemies;
+	public List<Enemy> enemies;
 	public int level = 1;
 	private bool enemiesMoving = false;
 	private bool doingSetup = false;
@@ -47,7 +47,7 @@ public class Game : MonoBehaviour
 			Destroy (gameObject);
 		}
 
-		inventory = new List<Slot> ();
+		//inventory = new List<Slot> ();
 		themePermutation = new List<int> ();
 
 		for (int i = 0; i < 5; i++)

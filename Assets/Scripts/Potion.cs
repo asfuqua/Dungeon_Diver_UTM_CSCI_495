@@ -3,36 +3,39 @@ using System.Collections;
 
 public class Potion : MonoBehaviour 
 {
-	private Player player;
 	public static Potion instance;
 
 	void Start()
 	{
-		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<Player>();
-		instance = this;
+		if (instance == null)
+		{
+			instance = this;
+		}
+		else if (instance != null)
+		{
+			Destroy (gameObject);
+		}
 	}
 
 
 	public void healingPotion()
 	{
-		player.gainHealth ((int)(player.maxHealth * 0.1));
+		Player.instance.gainHealth ((int)(Player.instance.maxHealth * 0.1));
 	}
 
 	public void manaPotion()
 	{
-		player.gainMana ((int)(player.maxMana * 0.1));
+		Player.instance.gainMana ((int)(Player.instance.maxMana * 0.1));
 	}
 
 	public void speedPotion()
 	{
-		Debug.Log ("Damage Increased!");
-		player.movementIncrease += 10;
+		Player.instance.movementIncrease += 20;
 	}
 
 	public void damagePotion()
 	{
-		Debug.Log ("Movement Increased!");
-		player.damageIncrease += 10;
+		Player.instance.damageIncrease += 20;
 	}
 
 
