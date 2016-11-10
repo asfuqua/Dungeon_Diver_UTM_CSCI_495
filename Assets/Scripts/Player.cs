@@ -7,6 +7,9 @@ using UnityEngine.SceneManagement;
 public class Player : Mover 
 {
 	public static Player instance;
+	public Image manaBarColor;
+	public bool levelTransition;
+
 
 	// PLAYER STATS
 	public int health;
@@ -34,7 +37,10 @@ public class Player : Mover
 	public Slider manaBar;				// the Ui Element to represent mana
 	public Text healthText;				// The overlay text for the health bar
 	public Text manaText;				// The overlay text for the mana bar
+	public Text dmgBuffText;
+	public Text moveBuffText;
 	public GameObject AmmoPanel;		// The UI Element holding the inventory and their durability values 
+	public GameObject gameOverPanel;
 	public Image CurrentEquip;			// the image showing the currently equipped weapon
 	public Image moveBuff;				
 	public Image dmgBuff;
@@ -56,10 +62,10 @@ public class Player : Mover
 	private SpriteRenderer spriterenderer;
 
 
-
+	// UNITY DRIVING FUNCTIONS
 	void Awake()
 	{
-		Debug.Log ("Awake is being called!");
+		//Debug.Log ("Player: Awake is being called!");
 
 		if (instance == null)
 		{
@@ -69,7 +75,10 @@ public class Player : Mover
 		{
 			Destroy (gameObject);
 		}
-			
+
+		Debug.Log ("Player: Awake is being called!");	
+		Player.instance.transform.position = new Vector3(3f, 3f, 0f);
+
 		DontDestroyOnLoad (gameObject);
 		uiMask = CurrentEquip.sprite;
 		/*healthBar = FindObjectOfType<UnityEngine.UI.Slider> ("Health Bar");
@@ -84,6 +93,7 @@ public class Player : Mover
 
 	protected override void Start()
 	{
+		Debug.Log ("Player: Start is being called.");
 		//animator = GetComponent <Animator> ();
 		//spriterenderer = GetComponent<SpriteRenderer> ();
 		maxHealth = 50;
@@ -100,6 +110,8 @@ public class Player : Mover
 		healthBar.value = health;
 		manaBar.maxValue = maxMana;
 		manaBar.value = mana;
+		levelTransition = false;
+
 
 		updateBars ();
 		
@@ -163,30 +175,30 @@ public class Player : Mover
 
 		}*/
 
-
-
-		int horizontal = 0;
-		int vertical = 0;
-
-		horizontal = (int)Input.GetAxisRaw ("Horizontal");
-		vertical = (int)Input.GetAxisRaw ("Vertical");
-
-		if (horizontal != 0)
+		if (levelTransition == false)
 		{
-			vertical = 0;
-		}
+			int horizontal = 0;
+			int vertical = 0;
+
+			horizontal = (int)Input.GetAxisRaw ("Horizontal");
+			vertical = (int)Input.GetAxisRaw ("Vertical");
+
+			if (horizontal != 0)
+			{
+				vertical = 0;
+			}
 			
-		if (horizontal != 0 || vertical != 0)
-		{
-			AttemptMove<Enemy>(horizontal, vertical);
+			if (horizontal != 0 || vertical != 0)
+			{
+				AttemptMove<Enemy> (horizontal, vertical);
+			}
 		}
-
-
-
 	}
 
 
 
+
+	// SELF WRITTEN FUNCTIONS
 	protected override void AttemptMove<T>(int x, int y)
 	{
 		base.AttemptMove<T>(x, y);
@@ -199,25 +211,7 @@ public class Player : Mover
 
 		//CheckIfGameOver ();
 
-		if (damageIncrease > 0)
-		{
-			damageIncrease--;
-
-			if (damageIncrease == 0)
-			{
-				dmgBuff.sprite = uiMask;
-			}
-		}
-		if (movementIncrease > 0)
-		{
-			movementIncrease--;
-
-			if (movementIncrease == 0)
-			{
-				moveBuff.sprite = uiMask;
-			}
-		}
-
+		decreaseBuffs ();
 
 		Game.instance.playersTurn = false;
 	}
@@ -241,49 +235,58 @@ public class Player : Mover
 			WeaponAnimation.transform.rotation = Quaternion.Euler (0f, 0f, cardinal);
 		}
 
+
 		switch (equippedWeapon)
 		{
 
 			case "Dagger": 
 				WeaponAnimation.GetComponent<Animator> ().SetTrigger ("swordSwing");
 				calculateDamage (target);
+				Game.instance.playersTurn = false;
 				break;
 			case "Sword": 
 				WeaponAnimation.GetComponent<Animator> ().SetTrigger ("swordSwing");
 				calculateDamage (target);
 				loseDurability();
+				Game.instance.playersTurn = false;
 				break;
 			case "Spear":
 				WeaponAnimation.GetComponent<Animator> ().SetTrigger ("spearStab");
 				calculateDamage (target);
 				loseDurability();
+				Game.instance.playersTurn = false;
 				break;
 			case "Bow":
 				WeaponAnimation.GetComponent<Animator> ().SetTrigger ("fireBow");
 				makeProjectile (cardinal);
 				loseDurability();
+				//Game.instance.playersTurn = false;
 				break;
 			case "Fire":
-				if (mana > 2)
+				if (mana >= 2)
 				{
 					WeaponAnimation.GetComponent<Animator> ().SetTrigger ("fireCast");
 					loseMana (2);
 					makeProjectile (cardinal);
-					loseDurability();;
+					loseDurability ();
+					//Game.instance.playersTurn = false;
 				}
+
 				break;
 			case "Ice":
-				if (mana > 2)
+				if (mana >= 2)
 				{
 					WeaponAnimation.GetComponent<Animator> ().SetTrigger ("iceCast");
 					loseMana (2);
 					makeProjectile (cardinal);
 					loseDurability();
+					//Game.instance.playersTurn = false;
 				}
 				break;
 		}
 
-		Game.instance.playersTurn = false;
+		decreaseBuffs();
+
 	}
 
 	private void makeProjectile(float cardinal)
@@ -297,6 +300,8 @@ public class Player : Mover
 		{
 			projectile.GetComponent<Projectile> ().damage = atk + Weapons.instance.inventory [equippedIndex].damageModifier;
 		}
+
+		Debug.Log ("Damage = " + projectile.GetComponent<Projectile> ().damage);
 
 		if (cardinal == 0)
 		{
@@ -328,14 +333,6 @@ public class Player : Mover
 		}
 
 
-		if (equippedWeapon == "Bow")
-		{
-			projectile.GetComponent<SpriteRenderer> ().sprite = arrow;
-
-			Instantiate(projectile, position, Quaternion.Euler (0f, 0f, cardinal));
-		}
-
-
 		switch (equippedWeapon)
 		{
 			case "Bow":
@@ -352,7 +349,7 @@ public class Player : Mover
 				break;
 		}
 
-
+		//Game.instance.playersTurn = false;
 
 	}
 
@@ -371,11 +368,13 @@ public class Player : Mover
 			case "Speed Potion":
 				Potion.instance.speedPotion ();
 				moveBuff.sprite = moveSprite;
+				moveBuffText.text =	movementIncrease.ToString();
 				other.gameObject.SetActive(false);
 				break;
 			case "Damage Potion":
 				Potion.instance.damagePotion ();
 				dmgBuff.sprite = damageSprite;
+				dmgBuffText.text = damageIncrease.ToString();
 				other.gameObject.SetActive(false);
 				break;
 			case "Sword":
@@ -403,7 +402,9 @@ public class Player : Mover
 				other.gameObject.SetActive (false);
 				break;
 			case "Exit":
+				levelTransition = true;
 				Invoke("Restart", restartLevelDelay);
+
 				break;
 			default:
 				break;
@@ -414,26 +415,32 @@ public class Player : Mover
 	public void gainHealth(int gain)
 	{
 		healthBar.value += gain;
+		health = (int)healthBar.value;
 		updateBars ();
 	}
 
 	public void loseHealth(int loss)
 	{
-		Debug.Log ("Health lost!");
 		healthBar.value -= loss;
 		health = (int)healthBar.value;
 		updateBars ();
+		if (health == 0)
+		{
+			Game.instance.GameOver ();
+		}
 	}
 
 	public void gainMana(int gain)
 	{
 		manaBar.value += gain;
+		mana = (int)manaBar.value;
 		updateBars ();
 	}
 
 	public void loseMana(int loss)
 	{
 		manaBar.value -= loss;
+		mana = (int)manaBar.value;
 		updateBars ();
 	}
 
@@ -446,6 +453,8 @@ public class Player : Mover
 
 	private void calculateDamage(Enemy target)
 	{
+		int temp;
+
 		if (equippedWeapon == "Dagger")
 		{
 			if (damageIncrease > 0)
@@ -462,10 +471,14 @@ public class Player : Mover
 			if (damageIncrease > 0)
 			{
 				target.takeDamage ((atk + Weapons.instance.inventory [equippedIndex].damageModifier) * 2);
+				temp = (atk + Weapons.instance.inventory [equippedIndex].damageModifier) * 2;
+				Debug.Log("Damage " + temp);
 			}
 			else
 			{
 				target.takeDamage (atk + Weapons.instance.inventory [equippedIndex].damageModifier);
+				temp = atk + Weapons.instance.inventory [equippedIndex].damageModifier;
+				Debug.Log("Damage: " + temp);
 			}
 
 		}
@@ -486,7 +499,33 @@ public class Player : Mover
 		*/
 	}
 
+	private void decreaseBuffs()
+	{
+		if (damageIncrease > 0)
+		{
+			damageIncrease--;
 
+			dmgBuffText.text = damageIncrease.ToString();
+
+			if (damageIncrease == 0)
+			{
+				dmgBuff.sprite = uiMask;
+				dmgBuffText.text = " ";
+			}
+		}
+		if (movementIncrease > 0)
+		{
+			movementIncrease--;
+
+			moveBuffText.text = movementIncrease.ToString();
+
+			if (movementIncrease == 0)
+			{
+				moveBuff.sprite = uiMask;
+				moveBuffText.text = " ";
+			}
+		}
+	}
 
 	protected override void OnCantMove<T>(T Component)
 	{
@@ -499,6 +538,7 @@ public class Player : Mover
 	protected void Restart()
 	{
 		SceneManager.LoadScene("Main", LoadSceneMode.Single);
+		levelTransition = false;
 	}
 		
 	public void getIntoAttemptMove(int x, int y)

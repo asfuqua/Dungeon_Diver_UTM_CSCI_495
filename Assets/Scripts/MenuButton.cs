@@ -7,7 +7,10 @@ public class MenuButton : MonoBehaviour
 	private Player player;
 	public LayerMask blockingLayer;
 	private bool moveOn;
-	private bool attackOn;
+	public bool attackOn;
+	public static MenuButton instance;
+
+
 
 	private int x;
 	private int y;
@@ -16,6 +19,18 @@ public class MenuButton : MonoBehaviour
 
 	void Start()
 	{
+
+		if (instance == null)
+		{
+			instance = this;
+		}
+		else if (instance != null)
+		{
+			Destroy (gameObject);
+		}
+
+		// (gameObject);
+
 		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<Player> ();
 		moveOn = false;
 		attackOn = false;
@@ -52,7 +67,7 @@ public class MenuButton : MonoBehaviour
 			}
 		}
 	
-		if (attackOn == true)
+		if (attackOn == true && Game.instance.playersTurn == true)
 		{
 
 			/* 1,0 is right

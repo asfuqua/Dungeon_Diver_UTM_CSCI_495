@@ -39,11 +39,12 @@ public class Projectile : Mover
 				Enemy e = other.gameObject.GetComponent<Enemy> ();
 				e.takeDamage (damage);
 				this.gameObject.SetActive (false);
+				Game.instance.playersTurn = false;
 				break;
 
-			case "Wall":
-				this.gameObject.SetActive (false);
-				break;
+			//case "Wall":
+				//this.gameObject.SetActive (false);
+				//break;
 
 		}
 	}

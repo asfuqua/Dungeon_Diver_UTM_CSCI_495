@@ -16,10 +16,11 @@ public class Board : MonoBehaviour
 
 	private Transform boardHolder;
 
-
+	//private List<List<Vector3>> name;
 	private List<Vector3> grid = new List<Vector3> ();
 	private List<Vector3> playableArea = new List<Vector3> ();
-	public List<GameObject> floorSpaces = new List<GameObject> ();
+	private List<Vector3> hallwaySpaces = new List<Vector3> ();
+	//public List<GameObject> floorSpaces = new List<GameObject> ();
 
 	private List<int> themePermutation;
 
@@ -54,6 +55,7 @@ public class Board : MonoBehaviour
 
 	public void makeLevel(int level)
 	{
+		Debug.Log ("Board: makeLevel called.");
 		boardHolder = new GameObject ("BoardHolder").transform;
 
 
@@ -64,10 +66,11 @@ public class Board : MonoBehaviour
 		//randomLevel = 4;
 		makeBoard (randomTheme);									// makes the rooms and hallways, places floor tiles on the points, moving each point that is used to another list
 		FillEmptySpaceWithWalls (randomTheme);						// puts a wall tile on every point that is left in the original list
-		placeObjectAtRandom (items, 5, 15);							// places random items at points that are available in rooms, ie FLoor tiles									
-		//int enemyCount = (int)Mathf.Log (level, 2f);
-		int enemyCount = level;
-		Debug.Log (enemyCount);
+		placeObjectAtRandom (items, 5, 15);							// places random items at points that are available in rooms, ie FLoor tiles	
+
+		int enemyCount = (int)Mathf.Log (level, 2f) * 2;
+
+		Debug.Log ("Board: Enemy count is " + enemyCount);
 		if (enemyCount == 0)
 		{
 			enemyCount = 1;
@@ -80,8 +83,8 @@ public class Board : MonoBehaviour
 
 	public void makeBoard(int theme)
 	{
-		int snakePositionY = 1;
-		int snakePositionX = 1;
+		int snakePositionY = 0;
+		int snakePositionX = 0;
 		int a = 0;
 		int b = 0;
 		int hallway;
@@ -90,127 +93,34 @@ public class Board : MonoBehaviour
 
 
 
-		while (snakePositionX < 32 && snakePositionY < 32)
+		// Randomize Rows and Columns
+		randomizeDimensions();
+		// Edge Generation
+		generateEdge(theme);
+		// First Room Generation Sentinel
+		generateRoom(theme, snakePositionX, snakePositionY);
+		// Remove the player's static position, so that nothing spawns there: Primarily the Exit
+		playableArea.Remove (new Vector3 (3f, 3f, 0f));
+
+
+
+		while (snakePositionX < 28 && snakePositionY < 28)
 		{
-			columns = 0;
-			rows = 0;
-
-
-			while (columns == rows)
-			{
-				columns = Random.Range (3, 9);
-				rows = Random.Range (3, 9);
-			}
-
-
-			for (int x = snakePositionX; x <= snakePositionX + columns; x++)
-			{
-				for (int y = snakePositionY; y <= snakePositionY + rows; y++)
-				{
-					switch (theme)
-					{
-						case 0:
-							currentTile = grassTiles [Random.Range (0, grassTiles.Length)];
-							instance = Instantiate (currentTile, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
-							instance.transform.SetParent (boardHolder);
-							floorSpaces.Add (instance);
-							break;
-						case 1:
-							instance = Instantiate (snowFloor, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
-							instance.transform.SetParent (boardHolder);
-							floorSpaces.Add (instance);
-							break;
-						case 2:
-							instance = Instantiate (dungeonFloor, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
-							instance.transform.SetParent (boardHolder);
-							floorSpaces.Add (instance);
-							break;
-						case 3:
-							currentTile = lavaTiles [Random.Range (0, lavaTiles.Length)];
-							instance = Instantiate (currentTile, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
-							instance.transform.SetParent (boardHolder);
-							floorSpaces.Add (instance);
-							break;
-						case 4:
-							currentTile = desertTiles [Random.Range (0, desertTiles.Length)];
-							instance = Instantiate (currentTile, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
-							instance.transform.SetParent (boardHolder);
-							floorSpaces.Add (instance);
-							break;
-						default:
-							break;
-					}
-					RemovePossibilityFromGrid (x, y);
-
-				}
-
-			}
-
+			
 			snakePositionX += columns;
 			snakePositionY += rows;
 
-			if (columns > rows)
-			{
-				a = snakePositionX + 1;
-				b = Random.Range (snakePositionY - rows, snakePositionY - 1);
-			}
-			else
-			{
-				a = Random.Range (snakePositionX - columns, snakePositionX - 1);
-				b = snakePositionY + 1;
-			}
-
-
-
-			for (hallway = Random.Range (2, 5); hallway >= 0; hallway--)
-			{
-				switch (theme)
-				{
-					case 0:
-						currentTile = grassTiles [Random.Range (0, grassTiles.Length)];
-						instance = Instantiate (currentTile, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
-						instance.transform.SetParent (boardHolder);
-						break;
-					case 1:
-						instance = Instantiate (snowFloor, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
-						instance.transform.SetParent (boardHolder);
-						break;
-					case 2:
-						instance = Instantiate (dungeonFloor, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
-						instance.transform.SetParent (boardHolder);
-						break;
-					case 3:
-						currentTile = lavaTiles [Random.Range (0, lavaTiles.Length)];
-						instance = Instantiate (currentTile, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
-						instance.transform.SetParent (boardHolder);
-						break;
-					case 4:
-						currentTile = desertTiles [Random.Range (0, desertTiles.Length)];
-						instance = Instantiate (currentTile, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
-						instance.transform.SetParent (boardHolder);
-						break;
-					default:
-						break;
-				}
-
-
-
-				RemovePossibilityFromGrid (a, b);
-				if (columns > rows)
-				{
-					a++;
-				}
-				else
-				{
-					b++;
-				}
-			}
+			generateHallway (theme, snakePositionX, snakePositionY, out a, out b);
 
 			snakePositionX = a;
 			snakePositionY = b;
+
+			// Randomize Rows and Columns
+			randomizeDimensions ();
+
+			// Room Generation
+			generateRoom (theme, snakePositionX, snakePositionY);
 		}
-
-
 	}
 
 	Vector3 randomPosition()
@@ -285,7 +195,7 @@ public class Board : MonoBehaviour
 			if (grid [i].x == x && grid [i].y == y)
 			{
 				grid.RemoveAt (i);
-				playableArea.Add (new Vector3 (x, y, 0f));
+				//playableArea.Add (new Vector3 (x, y, 0f));
 			}
 		}
 	}
@@ -301,8 +211,213 @@ public class Board : MonoBehaviour
 				grid.Add(new Vector3(x, y, 0f));
 			}
 		}
-
 	}
 
+	void generateEdge(int theme)
+	{
+		GameObject currentTile;
 
+		for (int x = -20; x <= 50; x++)
+		{
+			for (int y = -20; y <= 50; y++)
+			{
+				if ((x >= -20 && x <= -10) || (x >= 40 && x <= 50) || (y >= -20 && y <= -10) || (y >= 40 && y <= 50))
+				{
+					switch (theme)
+					{
+						case 0:
+							instance = Instantiate (grassWall, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+							instance.transform.SetParent (boardHolder);
+							break;
+						case 1:
+							instance = Instantiate (iceWall, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+							instance.transform.SetParent (boardHolder);
+							break;
+						case 2:
+							currentTile = dungeonWalls [Random.Range (0, dungeonWalls.Length)];
+							instance = Instantiate (currentTile, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+							instance.transform.SetParent (boardHolder);
+							break;
+						case 3:
+							currentTile = lavaWall [Random.Range (0, lavaWall.Length)];
+							instance = Instantiate (currentTile, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+							instance.transform.SetParent (boardHolder);
+							break;
+						case 4:
+							instance = Instantiate (desertWall, new Vector3(x, y, 0f), Quaternion.identity) as GameObject;
+							instance.transform.SetParent (boardHolder);
+							break;
+						default:
+							break;
+					}
+
+					for (int i = 0; i < grid.Count; i++)
+					{
+						if (grid [i].x == x && grid [i].y == y)
+						{
+							grid.RemoveAt (i);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void generateRoom(int theme, int snakePositionX, int snakePositionY)
+	{
+		GameObject currentTile;
+
+		for (int x = snakePositionX; x <= snakePositionX + columns; x++)
+		{
+			for (int y = snakePositionY; y <= snakePositionY + rows; y++)
+			{
+				for (int i = 0; i < grid.Count; i++)
+				{
+					if (new Vector3 (x, y, 0f) == grid [i])
+					{
+						switch (theme)
+						{
+							case 0:
+								currentTile = grassTiles [Random.Range (0, grassTiles.Length)];
+								instance = Instantiate (currentTile, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
+								instance.transform.SetParent (boardHolder);
+								playableArea.Add (new Vector3 (x, y, 0f));
+								break;
+							case 1:
+								instance = Instantiate (snowFloor, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
+								instance.transform.SetParent (boardHolder);
+								playableArea.Add (new Vector3 (x, y, 0f));
+								break;
+							case 2:
+								instance = Instantiate (dungeonFloor, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
+								instance.transform.SetParent (boardHolder);
+								playableArea.Add (new Vector3 (x, y, 0f));
+								break;
+							case 3:
+								currentTile = lavaTiles [Random.Range (0, lavaTiles.Length)];
+								instance = Instantiate (currentTile, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
+								instance.transform.SetParent (boardHolder);
+								playableArea.Add (new Vector3 (x, y, 0f));
+								break;
+							case 4:
+								currentTile = desertTiles [Random.Range (0, desertTiles.Length)];
+								instance = Instantiate (currentTile, new Vector3 (x, y, 0f), Quaternion.identity) as GameObject;
+								instance.transform.SetParent (boardHolder);
+								playableArea.Add (new Vector3 (x, y, 0f));
+								break;
+							default:
+								break;
+						}
+
+						RemovePossibilityFromGrid (x, y);
+					}
+				}
+
+				if (y == snakePositionY && x == snakePositionX)
+				{
+					moveToHallway (x, y);
+				}
+
+			}
+		}
+	}
+
+	void generateHallway(int theme, int snakePositionX, int snakePositionY, out int a, out int b)
+	{
+		int hallway;
+		GameObject currentTile;
+
+
+		//Debug.Log ("x: " + snakePositionX + ", y: " + snakePositionY);
+
+		if (columns > rows)
+		{
+			a = snakePositionX + 1;
+			b = Random.Range (snakePositionY - rows, snakePositionY - 1);
+			moveToHallway (a - 1, b);
+		}
+		else
+		{
+			a = Random.Range (snakePositionX - columns, snakePositionX - 1);
+			b = snakePositionY + 1;
+			moveToHallway (a, b - 1);
+		}
+
+
+		// Place hallway
+		for (hallway = Random.Range (2, 5); hallway >= 0; hallway--)
+		{
+			switch (theme)
+			{
+				case 0:
+					currentTile = grassTiles [Random.Range (0, grassTiles.Length)];
+					instance = Instantiate (currentTile, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					hallwaySpaces.Add (new Vector3 (a, b, 0f));
+					break;
+				case 1:
+					instance = Instantiate (snowFloor, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					hallwaySpaces.Add (new Vector3 (a, b, 0f));
+					break;
+				case 2:
+					instance = Instantiate (dungeonFloor, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					hallwaySpaces.Add (new Vector3 (a, b, 0f));
+					break;
+				case 3:
+					currentTile = lavaTiles [Random.Range (0, lavaTiles.Length)];
+					instance = Instantiate (currentTile, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					hallwaySpaces.Add (new Vector3 (a, b, 0f));
+					break;
+				case 4:
+					currentTile = desertTiles [Random.Range (0, desertTiles.Length)];
+					instance = Instantiate (currentTile, new Vector3 (a, b, 0f), Quaternion.identity) as GameObject;
+					instance.transform.SetParent (boardHolder);
+					hallwaySpaces.Add (new Vector3 (a, b, 0f));
+					break;
+				default:
+					break;
+			}
+
+
+
+			RemovePossibilityFromGrid (a, b);
+			if (columns > rows)
+			{
+				a++;
+			}
+			else
+			{
+				b++;
+			}
+		}
+	}
+
+	void randomizeDimensions()
+	{
+		columns = 0;
+		rows = 0;
+
+		while (columns == rows)
+		{
+			columns = Random.Range (4, 9);
+			rows = Random.Range (4, 9);
+		}
+	}
+
+	void moveToHallway(int x, int y)
+	{
+		for (int i = 0; i < playableArea.Count; i++)
+		{
+			if (new Vector3 (x, y, 0f) == playableArea [i])
+			{
+				playableArea.Remove (playableArea [i]);
+			}
+		}
+
+		hallwaySpaces.Add (new Vector3 (x, y, 0f));
+
+	}
 }

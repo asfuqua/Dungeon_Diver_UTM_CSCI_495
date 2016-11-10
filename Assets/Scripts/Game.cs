@@ -1,13 +1,4 @@
-﻿/*
- * 
- * FIX ANYTHING RELATED TO ENEMIES
- * NEED TO ADD ENEMY SCRIPT
- * 
- * 
- */
-
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -15,27 +6,31 @@ using UnityEngine.UI;
 
 public class Game : MonoBehaviour
 {
-	//public List<Slot> inventory;
-	private List<int> themePermutation;
-
-
-
-	public bool firstLevel = true;
-	public float levelStartDelay = 2f;
-	public float turnDelay = 0.1f;
+	// SCRIPTS
 	public static Game instance = null;
 	public Board boardScript;
+	public JackKnife jackKnifeScript;
 
+	// BOOLEANS
 	public bool playersTurn = true;
-
-
-
-
-	public List<Enemy> enemies;
-	public int level = 1;
 	private bool enemiesMoving = false;
 	private bool doingSetup = false;
+	public bool firstLevel = true;
+	public bool isGameOver = false;
 
+	// FLOATS
+	public float levelStartDelay = 2f;
+	public float turnDelay = 0.1f;
+
+	// LISTS
+	private List<int> themePermutation;
+	public List<Enemy> enemies;
+
+	// INTS
+	public int level;
+
+
+	// UNITY FUNCTIONS
 	void Awake()
 	{
 		if (instance == null)
@@ -46,6 +41,9 @@ public class Game : MonoBehaviour
 		{
 			Destroy (gameObject);
 		}
+
+
+		Game.instance.level++;
 
 		//inventory = new List<Slot> ();
 		themePermutation = new List<int> ();
@@ -64,27 +62,56 @@ public class Game : MonoBehaviour
 		DontDestroyOnLoad (gameObject);
 		enemies = new List<Enemy> ();
 		boardScript = GetComponent<Board> ();
+		jackKnifeScript = GetComponent<JackKnife> ();
+		//InitBoss ();
 		InitGame ();
 	}
 
-	private void OnLevelWasLoaded(int index)
+	void Update()
 	{
-		level++;
-		Player.instance.transform.position = new Vector3(3f, 3f, 0f);
-		Player.instance.updateBars ();
-		//Player.instance.transform.position = 0f;
-		//InitGame ();
+
+		if (Game.instance.isGameOver == true)
+		{
+			if (Input.anyKey)
+			{
+				Application.Quit();
+			}
+
+		}
+
+		if (playersTurn || enemiesMoving || doingSetup)
+		{
+			return;
+		}
+
+
+
+		StartCoroutine (moveEnemies ());
+
 	}
 
+
+	// MY FUNCTIONS
 	void InitGame()
 	{
+		Debug.Log ("-------" + "Level " + Game.instance.level + "-------");
+
+
 		//doingSetup = true;
 		//Invoke ("hideLevelImage", levelStartDelay);
-		//Weapons.instance.inventory = inventory;
-		//enemies.Clear ();
 
-		boardScript.makeLevel (level);
+		Game.instance.enemies.Clear ();
 
+		boardScript.makeLevel (Game.instance.level);
+		//Player.instance.transform.position = new Vector3(3f, 3f, 0f);
+		//Player.instance.updateBars ();
+
+	}
+
+	void InitBoss ()
+	{
+		Game.instance.enemies.Clear ();
+		jackKnifeScript.makeBoard();
 	}
 
 	private void hideLevelImage()
@@ -94,19 +121,9 @@ public class Game : MonoBehaviour
 
 	public void GameOver()
 	{
-		//enabled = false;
-	}
-
-	void Update()
-	{
-
-		if (playersTurn || enemiesMoving || doingSetup)
-		{
-			return;
-		}
-
-		StartCoroutine (moveEnemies ());
-
+		Game.instance.isGameOver = true;
+		Player.instance.gameObject.SetActive (false);
+		Player.instance.gameOverPanel.SetActive (true);
 	}
 
 	public void addEnemy(Enemy script)
@@ -121,6 +138,10 @@ public class Game : MonoBehaviour
 
 	IEnumerator moveEnemies()
 	{
+		//Debug.Log ("Moving " + enemies.Count + " enemies.");
+
+
+
 		enemiesMoving = true;
 		yield return new WaitForSeconds (turnDelay);
 		if (enemies.Count == 0)
@@ -147,6 +168,9 @@ public class Game : MonoBehaviour
 		enemiesMoving = false;
 
 	}
+
+
+
 
 	void swap(int first, int second)
 	{

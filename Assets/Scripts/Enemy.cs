@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
 public class Enemy : Mover 
 {
@@ -8,6 +9,11 @@ public class Enemy : Mover
 	public int enemyMaxHealth;
 	public int range;
 	public int damage;
+	public bool boss;
+
+
+	public Slider healthBar;
+
 
 
 	private Animator animator;
@@ -22,15 +28,18 @@ public class Enemy : Mover
 		animator = GetComponent<Animator> ();
 		player = GameObject.FindGameObjectWithTag ("Player").GetComponent<Player>();
 		target = GameObject.FindGameObjectWithTag ("Player").transform;
+
+		healthBar.value = enemyHealth;
+		healthBar.maxValue = enemyMaxHealth;
+
+		//healthBar = Instantiate (healthBar, new Vector3 (0f, 1f, 1f), Quaternion.identity) as GameObject;
+		//healthBar.transform.SetParent (this.transform);
+		//healthBar.value = enemyMaxHealth;
+
+
 		base.Start ();
 
 	}
-
-	/*protected override void AttemptMove(int x, int y)
-	{
-		base.AttemptMove (x, y);
-	}
-	*/
 	public bool checkRange()
 	{
 		Vector2 p = target.position;
@@ -54,20 +63,41 @@ public class Enemy : Mover
 	public void takeDamage(int damage)
 	{
 		enemyHealth -= damage;
-		float percentage = (float)enemyHealth / (float)enemyMaxHealth;
 
-		this.transform.localScale = new Vector3 (percentage, percentage, 1f);
-		if (this.transform.localScale.x < 0 || this.transform.localScale.y < 0)
-		{
-			this.transform.localScale = new Vector3 (0f, 0f, 1f);
-		}
+		healthBar.value = enemyHealth;
 
-		if (this.transform.localScale == new Vector3 (0f, 0f, 1f))
+
+		if (enemyHealth <= 0)
 		{
-			this.gameObject.SetActive (false);
+			enemyHealth = 0;
 			Game.instance.removeEnemy (this);
+			this.gameObject.SetActive (false);
 		}
-	
+		else
+		{
+			float percentage = (float)enemyHealth / (float)enemyMaxHealth;
+
+
+			if (boss == true)
+			{
+				this.transform.localScale = new Vector3 (percentage + 1, percentage + 1, 1f);
+			}
+			else
+			{
+				this.transform.localScale = new Vector3 (percentage, percentage, 1f);
+			}
+
+
+
+			healthBar.transform.localScale = new Vector3 (1 / this.transform.localScale.x, 1 / this.transform.localScale.y, 0f);
+			healthBar.transform.position = new Vector3 (healthBar.transform.position.x, (float)(healthBar.transform.position.y + 0.2), 0f);
+			
+			if (this.transform.localScale.x < 0 || this.transform.localScale.y < 0)
+			{
+				this.transform.localScale = new Vector3 (0f, 0f, 1f);
+			}
+		
+		}
 	}
 
 	public void moveEnemy()
